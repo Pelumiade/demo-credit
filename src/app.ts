@@ -22,6 +22,8 @@ app.use(
 );
 app.use(express.json());
 
+app.get('/', (_req: Request, res: Response) => res.json({ message: 'Welcome to Demo Credit API' }));
+
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 
 app.use(

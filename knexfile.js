@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 /** @type {import('knex').Knex.Config} */
 const baseConnection = {
   host: process.env.DB_HOST,

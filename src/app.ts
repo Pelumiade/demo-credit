@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
@@ -22,7 +22,7 @@ app.use(
 );
 app.use(express.json());
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 
 app.use(
   '/api-docs',
@@ -37,7 +37,7 @@ app.use(
 
 app.use(routes);
 
-app.use((_req, res) => sendNotFound(res, 'Route not found'));
+app.use((_req: Request, res: Response) => sendNotFound(res, 'Route not found'));
 
 app.use(errorHandler);
 

@@ -1,9 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
+import { isValidEmailFormat, normalizeEmail } from '../utils/email';
 import { sendError } from '../utils/response';
 
-type Rule = { field: string; type: 'string' | 'number' | 'email'; required?: boolean };
+type Rule = {
+  field: string;
+  type: 'string' | 'number' | 'email' | 'password';
+  required?: boolean;
+};
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 128;
 
 export const validate =
   (rules: Rule[]) =>
@@ -23,6 +29,21 @@ export const validate =
         return;
       }
 
+      if (rule.type === 'password') {
+        if (typeof value !== 'string') {
+          sendError(res, `${rule.field} must be a string`, 400);
+          return;
+        }
+        if (value.length < MIN_PASSWORD_LENGTH) {
+          sendError(res, `${rule.field} must be at least ${MIN_PASSWORD_LENGTH} characters`, 400);
+          return;
+        }
+        if (value.length > MAX_PASSWORD_LENGTH) {
+          sendError(res, `${rule.field} is too long`, 400);
+          return;
+        }
+      }
+
       if (rule.type === 'number') {
         const num = Number(value);
         if (isNaN(num) || num <= 0) {
@@ -31,9 +52,16 @@ export const validate =
         }
       }
 
-      if (rule.type === 'email' && !EMAIL_REGEX.test(value)) {
-        sendError(res, `${rule.field} must be a valid email`, 400);
-        return;
+      if (rule.type === 'email') {
+        if (typeof value !== 'string') {
+          sendError(res, `${rule.field} must be a string`, 400);
+          return;
+        }
+        if (!isValidEmailFormat(value)) {
+          sendError(res, `${rule.field} must be a valid email`, 400);
+          return;
+        }
+        req.body[rule.field] = normalizeEmail(value);
       }
     }
 

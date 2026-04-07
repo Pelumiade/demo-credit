@@ -17,8 +17,8 @@ jest.mock('../../src/config/db', () => {
   return { __esModule: true, default: mockDb };
 });
 
-const mockPayload = { name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678' };
-const mockUser = { id: 'user-uuid', ...mockPayload };
+const mockPayload = { name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678', password: 'password123' };
+const mockUser = { id: 'user-uuid', name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678' };
 
 describe('AuthService.registerUser', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -35,6 +35,13 @@ describe('AuthService.registerUser', () => {
 
       expect(result.user.email).toBe(mockPayload.email);
       expect(result.token).toMatch(/^faux-token-/);
+      expect((result.user as { password_hash?: string }).password_hash).toBeUndefined();
+      expect(UserModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          password_hash: expect.stringMatching(/^\$2[aby]\$/),
+        }),
+        expect.anything()
+      );
     });
 
     it('calls karma check before writing to the database', async () => {

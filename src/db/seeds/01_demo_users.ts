@@ -17,8 +17,8 @@ export async function seed(knex: Knex): Promise<void> {
   ]);
 
   await knex('wallets').insert([
-    { id: walletAId, user_id: userAId, balance: 10000.00 },
-    { id: walletBId, user_id: userBId, balance: 5000.00 },
+    { id: walletAId, user_id: userAId, balance: 10000.0 },
+    { id: walletBId, user_id: userBId, balance: 5000.0 },
   ]);
 
   console.log('─────────────────────────────────────────');

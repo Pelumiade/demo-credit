@@ -10,7 +10,7 @@ describe('Auth Routes', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('POST /auth/register', () => {
-    const validPayload = { name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678' };
+    const validPayload = { name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678', password: 'password123' };
     const mockResult = {
       user: { id: 'user-uuid', ...validPayload },
       token: 'faux-token-user-uuid',
@@ -30,16 +30,25 @@ describe('Auth Routes', () => {
     it('returns 400 when name is missing', async () => {
       const res = await request(app)
         .post('/auth/register')
-        .send({ email: 'ada@test.com', phone: '08012345678' });
+        .send({ email: 'ada@test.com', phone: '08012345678', password: 'password123' });
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
 
+    it('returns 400 when password is too short', async () => {
+      const res = await request(app)
+        .post('/auth/register')
+        .send({ ...validPayload, password: 'short' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.message).toMatch(/password/i);
+    });
+
     it('returns 400 when email is invalid', async () => {
       const res = await request(app)
         .post('/auth/register')
-        .send({ name: 'Ada', email: 'not-an-email', phone: '08012345678' });
+        .send({ name: 'Ada', email: 'not-an-email', phone: '08012345678', password: 'password123' });
 
       expect(res.status).toBe(400);
     });
@@ -47,7 +56,7 @@ describe('Auth Routes', () => {
     it('returns 400 when phone is missing', async () => {
       const res = await request(app)
         .post('/auth/register')
-        .send({ name: 'Ada', email: 'ada@test.com' });
+        .send({ name: 'Ada', email: 'ada@test.com', password: 'password123' });
 
       expect(res.status).toBe(400);
     });

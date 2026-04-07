@@ -10,6 +10,7 @@ router.post(
     { field: 'name', type: 'string', required: true },
     { field: 'email', type: 'email', required: true },
     { field: 'phone', type: 'string', required: true },
+    { field: 'password', type: 'password', required: true },
   ]),
   register
 );

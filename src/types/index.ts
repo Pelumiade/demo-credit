@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  /** Set on create; never returned from the API. */
+  password_hash?: string | null;
   created_at?: Date;
 }
 

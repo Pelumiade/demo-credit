@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { UserModel } from '../models/user.model';
 import { WalletModel } from '../models/wallet.model';
@@ -10,7 +11,10 @@ interface RegisterPayload {
   name: string;
   email: string;
   phone: string;
+  password: string;
 }
+
+const BCRYPT_ROUNDS = 10;
 
 export const registerUser = async (payload: RegisterPayload): Promise<{ user: User; token: string }> => {
   const existing = await UserModel.findByEmail(payload.email);
@@ -21,13 +25,16 @@ export const registerUser = async (payload: RegisterPayload): Promise<{ user: Us
 
   const userId = uuidv4();
   const walletId = uuidv4();
+  const password_hash = await bcrypt.hash(payload.password, BCRYPT_ROUNDS);
+  const { password: _pw, ...rest } = payload;
 
   await db.transaction(async (trx) => {
-    await UserModel.create({ id: userId, ...payload }, trx);
+    await UserModel.create({ id: userId, ...rest, password_hash }, trx);
     await WalletModel.create({ id: walletId, user_id: userId, balance: 0 }, trx);
   });
 
-  const user = (await UserModel.findById(userId)) as User;
+  const row = (await UserModel.findById(userId)) as User;
+  const { password_hash: _h, ...user } = row;
   const token = `faux-token-${userId}`;
 
   return { user, token };

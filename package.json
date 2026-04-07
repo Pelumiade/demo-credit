@@ -4,10 +4,11 @@
   "description": "MVP wallet service — Lendsqr backend engineering assessment",
   "main": "dist/server.js",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "scripts": {
     "build": "tsc",
+    "postinstall": "npm run build",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "migrate": "knex --knexfile knexfile.ts migrate:latest",

@@ -8,7 +8,6 @@ export async function up(knex: Knex): Promise<void> {
     table.decimal('amount', 15, 2).notNullable();
     table.string('reference').unique().notNullable();
     table.uuid('counterparty_id').nullable().references('id').inTable('wallets');
-    // JSON type isn't supported on some hosted MySQL variants; store as text.
     table.text('metadata', 'longtext').nullable();
     table.timestamp('created_at').defaultTo(knex.fn.now());
 

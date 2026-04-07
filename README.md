@@ -72,7 +72,7 @@ Three tables. That's all this service needs.
                               │ amount          DECIMAL       │
                               │ reference       VARCHAR       │
                               │ counterparty_id UUID NULL FK  │
-                              │ metadata        JSON NULL     │
+                              │ metadata        TEXT NULL     │
                               │ created_at      TIMESTAMP     │
                               └───────────────────────────────┘
 ```
@@ -84,6 +84,7 @@ Three tables. That's all this service needs.
 - When a transfer happens, two transaction rows are created — one for the sender, one for the receiver — each row has its own unique `reference` (the column is unique in the database)
 - `balance` is stored as DECIMAL, not float. floats have rounding issues with money, DECIMAL does not
 - All primary keys are UUIDs instead of auto-increment integers, harder to guess, better for distributed systems
+- `transactions.metadata` is stored as TEXT (JSON string) for compatibility with hosted MySQL providers
 
 ---
 

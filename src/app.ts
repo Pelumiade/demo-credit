@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
@@ -7,6 +8,9 @@ import { errorHandler } from './middleware/error.middleware';
 import { sendNotFound } from './utils/response';
 
 const app = express();
+
+app.use(cors());
+app.options('*', cors());
 
 app.use(
   helmet({

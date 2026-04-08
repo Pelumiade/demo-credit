@@ -362,7 +362,7 @@ Registration emails are validated beyond a single loose regex, then **trimmed an
 ## Live URL
 
 ```
-https:
+https://afolabi-adepena-lendsqr-be-test.onrender.com
 ```
 
 ---

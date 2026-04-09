@@ -44,41 +44,10 @@ This separation means if something breaks, you know exactly which layer to look 
 
 ## Entity-Relationship Diagram
 
-ER Diagram
-
 Three tables. That's all this service needs.
 
-```
-┌───────────────────────────┐         ┌─────────────────────────┐
-│           users           │         │         wallets          │
-├───────────────────────────┤         ├─────────────────────────┤
-│ id            UUID PK     │────────►│ id          UUID PK     │
-│ name          VARCHAR     │  1 : 1  │ user_id     UUID FK     │
-│ email         VARCHAR     │         │ balance     DECIMAL     │
-│ phone         VARCHAR     │         │ created_at  TIMESTAMP   │
-│ password_hash VARCHAR NULL│         │ updated_at  TIMESTAMP   │
-│ created_at    TIMESTAMP   │         └─────────────────────────┘
-└───────────────────────────┘
-                                            │
-                                            │ 1 : many
-                                            ▼
-                              ┌───────────────────────────────┐
-                              │         transactions          │
-                              ├───────────────────────────────┤
-                              │ id              UUID PK       │
-                              │ wallet_id       UUID FK       │
-                              │ type            ENUM          │
-                              │  (fund|transfer|withdraw)     │
-                              │ amount          DECIMAL       │
-                              │ reference       VARCHAR       │
-                              │ counterparty_id UUID NULL FK  │
-                              │ metadata        JSON NULL     │
-                              │ created_at      TIMESTAMP     │
-                              └───────────────────────────────┘
-```
-## Entity-Relationship Diagram
-
 ![ER Diagram](./docs/er-diagram.png)
+
 **A few things worth noting about this design:**
 
 - Every user gets exactly one wallet, that's the 1:1 relationship between users and wallets

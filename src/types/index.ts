@@ -26,7 +26,7 @@ export interface Transaction {
   amount: number;
   reference: string;
   counterparty_id?: string | null;
-  metadata?: Record<string, unknown> | null;
+  metadata?: string | null;
   created_at?: Date;
 }
 

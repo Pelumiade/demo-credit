@@ -23,7 +23,15 @@ export const fundWallet = async (userId: string, amount: number): Promise<Wallet
     await WalletModel.updateBalance(wallet.id, newBalance, trx);
 
     await TransactionModel.create(
-      { id: uuidv4(), wallet_id: wallet.id, type: 'fund', amount, reference: uuidv4() },
+      {
+        id: uuidv4(),
+        wallet_id: wallet.id,
+        type: 'fund',
+        amount,
+        reference: uuidv4(),
+        counterparty_id: wallet.id,
+        metadata: JSON.stringify({ source: 'self', action: 'fund' }),
+      },
       trx
     );
 
@@ -56,11 +64,27 @@ export const transferFunds = async (
 
     // Each row needs its own `reference` — the column is unique.
     await TransactionModel.create(
-      { id: uuidv4(), wallet_id: senderWallet.id, type: 'transfer', amount, reference: uuidv4(), counterparty_id: recipientWallet.id },
+      {
+        id: uuidv4(),
+        wallet_id: senderWallet.id,
+        type: 'transfer',
+        amount,
+        reference: uuidv4(),
+        counterparty_id: recipientWallet.id,
+        metadata: JSON.stringify({ direction: 'debit', action: 'transfer', recipient_email: recipientEmail }),
+      },
       trx
     );
     await TransactionModel.create(
-      { id: uuidv4(), wallet_id: recipientWallet.id, type: 'transfer', amount, reference: uuidv4(), counterparty_id: senderWallet.id },
+      {
+        id: uuidv4(),
+        wallet_id: recipientWallet.id,
+        type: 'transfer',
+        amount,
+        reference: uuidv4(),
+        counterparty_id: senderWallet.id,
+        metadata: JSON.stringify({ direction: 'credit', action: 'transfer', sender_id: senderId }),
+      },
       trx
     );
   });
@@ -79,7 +103,15 @@ export const withdrawFunds = async (userId: string, amount: number): Promise<Wal
     await WalletModel.updateBalance(wallet.id, newBalance, trx);
 
     await TransactionModel.create(
-      { id: uuidv4(), wallet_id: wallet.id, type: 'withdraw', amount, reference: uuidv4() },
+      {
+        id: uuidv4(),
+        wallet_id: wallet.id,
+        type: 'withdraw',
+        amount,
+        reference: uuidv4(),
+        counterparty_id: wallet.id,
+        metadata: JSON.stringify({ source: 'self', action: 'withdraw' }),
+      },
       trx
     );
 

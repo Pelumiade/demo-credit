@@ -1,8 +1,16 @@
-import { registerUser } from '../../src/services/auth.service';
+import { loginUser, registerUser } from '../../src/services/auth.service';
 import { UserModel } from '../../src/models/user.model';
 import { WalletModel } from '../../src/models/wallet.model';
 import * as karmaService from '../../src/services/karma.service';
 import db from '../../src/config/db';
+
+jest.mock('bcryptjs', () => ({
+  __esModule: true,
+  default: {
+    hash: jest.fn(async () => '$2a$10$hashed'),
+    compare: jest.fn(async () => true),
+  },
+}));
 
 jest.mock('../../src/models/user.model');
 jest.mock('../../src/models/wallet.model');
@@ -19,6 +27,7 @@ jest.mock('../../src/config/db', () => {
 
 const mockPayload = { name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678', password: 'password123' };
 const mockUser = { id: 'user-uuid', name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678' };
+const mockUserWithHash = { ...mockUser, password_hash: '$2a$10$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' };
 
 describe('AuthService.registerUser', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -90,5 +99,29 @@ describe('AuthService.registerUser', () => {
       await expect(registerUser(mockPayload)).rejects.toThrow('Karma service unavailable');
       expect(UserModel.create).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('AuthService.loginUser', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns user + token when credentials are valid', async () => {
+    (UserModel.findByEmail as jest.Mock).mockResolvedValue(mockUserWithHash);
+
+    const result = await loginUser({ email: mockUser.email, password: 'password123' });
+
+    expect(result.token).toBe(`faux-token-${mockUser.id}`);
+    expect(result.user.email).toBe(mockUser.email);
+    expect((result.user as { password_hash?: string }).password_hash).toBeUndefined();
+  });
+
+  it('throws 401 when user is not found', async () => {
+    (UserModel.findByEmail as jest.Mock).mockResolvedValue(undefined);
+    await expect(loginUser({ email: 'missing@test.com', password: 'password123' })).rejects.toMatchObject({ statusCode: 401 });
+  });
+
+  it('throws 401 when password_hash is missing', async () => {
+    (UserModel.findByEmail as jest.Mock).mockResolvedValue(mockUser);
+    await expect(loginUser({ email: mockUser.email, password: 'password123' })).rejects.toMatchObject({ statusCode: 401 });
   });
 });

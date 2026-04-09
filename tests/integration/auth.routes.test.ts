@@ -93,4 +93,35 @@ describe('Auth Routes', () => {
       expect(res.status).toBe(500);
     });
   });
+
+  describe('POST /auth/login', () => {
+    const validPayload = { email: 'ada@test.com', password: 'password123' };
+    const mockResult = {
+      user: { id: 'user-uuid', name: 'Ada Obi', email: 'ada@test.com', phone: '08012345678' },
+      token: 'faux-token-user-uuid',
+    };
+
+    it('logs in and returns a token', async () => {
+      (AuthService.loginUser as jest.Mock).mockResolvedValue(mockResult);
+
+      const res = await request(app).post('/auth/login').send(validPayload);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.token).toMatch(/^faux-token-/);
+      expect(res.body.data.user.email).toBe(validPayload.email);
+    });
+
+    it('returns 400 when password is missing', async () => {
+      const res = await request(app).post('/auth/login').send({ email: 'ada@test.com' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 401 for invalid credentials', async () => {
+      (AuthService.loginUser as jest.Mock).mockRejectedValue(Object.assign(new Error('Invalid credentials'), { statusCode: 401 }));
+
+      const res = await request(app).post('/auth/login').send(validPayload);
+      expect(res.status).toBe(401);
+    });
+  });
 });

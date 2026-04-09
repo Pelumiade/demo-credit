@@ -7,15 +7,26 @@ const client = axios.create({
   timeout: 5000,
 });
 
-export const isBlacklisted = async (email: string): Promise<boolean> => {
+const checkIdentity = async (identity: string): Promise<boolean> => {
   try {
-    const { data } = await client.get(`/verification/karma/${email}`);
-    return data?.data?.karma_identity !== undefined;
+    const { data } = await client.get(`/verification/karma/${encodeURIComponent(identity)}`);
+    return data?.status === 'success' && data?.data?.karma_identity !== undefined;
   } catch (err: unknown) {
     if (axios.isAxiosError(err) && err.response?.status === 404) {
       return false;
     }
-    // Fail closed — if the Karma API is unreachable, deny onboarding
     throw new Error('Karma service unavailable');
   }
+};
+
+export const isBlacklisted = async (email: string): Promise<boolean> => {
+  const domain = email.split('@')[1];
+
+  // Check both the full email and the domain against Karma
+  const [emailBlacklisted, domainBlacklisted] = await Promise.all([
+    checkIdentity(email),
+    checkIdentity(domain),
+  ]);
+
+  return emailBlacklisted || domainBlacklisted;
 };

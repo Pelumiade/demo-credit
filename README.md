@@ -50,15 +50,16 @@ ER Diagram
 Three tables. That's all this service needs.
 
 ```
-┌──────────────────────┐         ┌─────────────────────────┐
-│        users         │         │         wallets          │
-├──────────────────────┤         ├─────────────────────────┤
-│ id        UUID PK    │────────►│ id          UUID PK     │
-│ name      VARCHAR    │  1 : 1  │ user_id     UUID FK     │
-│ email     VARCHAR    │         │ balance     DECIMAL     │
-│ phone     VARCHAR    │         │ created_at  TIMESTAMP   │
-│ created_at TIMESTAMP │         │ updated_at  TIMESTAMP   │
-└──────────────────────┘         └─────────────────────────┘
+┌───────────────────────────┐         ┌─────────────────────────┐
+│           users           │         │         wallets          │
+├───────────────────────────┤         ├─────────────────────────┤
+│ id            UUID PK     │────────►│ id          UUID PK     │
+│ name          VARCHAR     │  1 : 1  │ user_id     UUID FK     │
+│ email         VARCHAR     │         │ balance     DECIMAL     │
+│ phone         VARCHAR     │         │ created_at  TIMESTAMP   │
+│ password_hash VARCHAR NULL│         │ updated_at  TIMESTAMP   │
+│ created_at    TIMESTAMP   │         └─────────────────────────┘
+└───────────────────────────┘
                                             │
                                             │ 1 : many
                                             ▼
@@ -72,7 +73,7 @@ Three tables. That's all this service needs.
                               │ amount          DECIMAL       │
                               │ reference       VARCHAR       │
                               │ counterparty_id UUID NULL FK  │
-                              │ metadata        TEXT NULL     │
+                              │ metadata        JSON NULL     │
                               │ created_at      TIMESTAMP     │
                               └───────────────────────────────┘
 ```
@@ -177,7 +178,7 @@ Every response from this API looks the same, success or failure:
 - **Swagger UI:** `GET /api-docs` (e.g. `http://localhost:3000/api-docs`)
 - **OpenAPI JSON:** `src/docs/openapi.json` (same document the UI loads)
 
-The spec documents **wallet** and **auth/register** endpoints. It intentionally does **not** include `GET /health` that route still exists on the server (`{ "status": "ok" }`) for uptime checks, but it is omitted from Swagger to keep the contract focused on wallet flows.
+The spec documents **wallet**, **auth/register**, and **auth/login** endpoints. It intentionally does **not** include `GET /health` that route still exists on the server (`{ "status": "ok" }`) for uptime checks, but it is omitted from Swagger to keep the contract focused on wallet flows.
 
 ---
 
@@ -215,6 +216,41 @@ Blacklisted `403`:
 {
   "success": false,
   "message": "Account creation denied"
+}
+```
+
+---
+
+### Login
+
+**POST /auth/login**
+
+```json
+{
+  "email": "fola@demo.com",
+  "password": "your-secure-password"
+}
+```
+
+Success `200`:
+
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": { "id": "uuid", "name": "Fola Pena", "email": "fola@demo.com" },
+    "token": "faux-token-<userId>"
+  }
+}
+```
+
+Invalid credentials `401`:
+
+```json
+{
+  "success": false,
+  "message": "Invalid credentials"
 }
 ```
 
@@ -350,9 +386,9 @@ It is a business rule that only applies to registration. Middleware is for cross
 
 `src/utils/response.ts` is the only place that calls `res.json()`. This means the response shape is always consistent. If the format needs to change, there is one place to change it.
 
-**Password hashing even though login is faux-token based**
+**Password hashing even though access is faux-token based**
 
-The assessment allows a faux Bearer token for API access, but registration still collects a password so credentials can exist for a future login flow. Passwords are hashed with **bcrypt** and only `password_hash` is stored, the API never returns the hash or the plain password.
+The assessment allows a faux Bearer token for API access, but registration still collects a password so credentials can exist for login. Passwords are hashed with **bcrypt** and only `password_hash` is stored, the API never returns the hash or the plain password.
 
 **Stricter email validation**
 
@@ -367,4 +403,34 @@ https://afolabi-adepena-lendsqr-be-test.onrender.com
 ```
 
 ---
+
+## Karma Blacklist — Testing Note
+
+The Karma check is wired up and calls the Adjutor API on every registration. The issue is that Adjutor only returns real blacklist data for accounts that have been KYC verified and  the API kept returning empty responses.
+
+To get around this and still show the logic works, the email `blacklisted@demo.com` is hardcoded as a test blocked identity. Every other email still goes through the real Adjutor API call normally.
+
+**To test it —register with this email:**
+
+```json
+POST /auth/register
+
+POST /auth/register — blacklisted test
+
+{
+  "name": "Bad User",
+  "email": "blacklisted@demo.com",
+  "phone": "08099999999",
+  "password": "password123"
+}
+```
+
+Expected response:
+
+```json
+{
+  "success": false,
+  "message": "Account creation denied"
+}
+```
 

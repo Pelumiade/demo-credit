@@ -77,7 +77,9 @@ Three tables. That's all this service needs.
                               │ created_at      TIMESTAMP     │
                               └───────────────────────────────┘
 ```
+## Entity-Relationship Diagram
 
+![ER Diagram](./docs/er-diagram.png)
 **A few things worth noting about this design:**
 
 - Every user gets exactly one wallet, that's the 1:1 relationship between users and wallets

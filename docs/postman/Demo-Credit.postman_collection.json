@@ -1,0 +1,193 @@
+{
+  "info": {
+    "name": "Demo Credit API",
+    "description": "Lendsqr Demo Credit wallet service — import this file in Postman (Import → Upload Files).\n\nAfter **Register** or **Login**, the collection saves `token` from the response for wallet requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://afolabi-adepena-lendsqr-be-test.onrender.com"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Welcome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j && j.data && j.data.token) {",
+                  "    pm.collectionVariables.set('token', j.data.token);",
+                  "  }",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fola Pena\",\n  \"email\": \"fola@demo.com\",\n  \"phone\": \"08012345678\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const j = pm.response.json();",
+                  "  if (j && j.data && j.data.token) {",
+                  "    pm.collectionVariables.set('token', j.data.token);",
+                  "  }",
+                  "} catch (e) {}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"fola@demo.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/wallet/balance"
+          }
+        },
+        {
+          "name": "Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/wallet/transactions"
+          }
+        },
+        {
+          "name": "Fund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000\n}"
+            },
+            "url": "{{baseUrl}}/wallet/fund"
+          }
+        },
+        {
+          "name": "Transfer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_email\": \"other@demo.com\",\n  \"amount\": 1000\n}"
+            },
+            "url": "{{baseUrl}}/wallet/transfer"
+          }
+        },
+        {
+          "name": "Withdraw",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500\n}"
+            },
+            "url": "{{baseUrl}}/wallet/withdraw"
+          }
+        }
+      ]
+    }
+  ]
+}

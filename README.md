@@ -13,7 +13,6 @@ It handles four things: creating a user account, funding a wallet, transferring 
 - [Project Structure](#project-structure)
 - [Tech Stack](#tech-stack)
 - [API Reference](#api-reference)
-- [API documentation (Swagger)](#api-documentation-swagger)
 - [Setup & Installation](#setup--installation)
 - [Environment Variables](#environment-variables)
 - [Running Tests](#running-tests)
@@ -94,6 +93,11 @@ Three tables. That's all this service needs.
 ## Project Structure
 
 ```
+docs/
+├── er-diagram.png                    — E-R diagram for the README
+└── postman/
+    └── Demo-Credit.postman_collection.json — Postman collection (import in Postman)
+
 src/
 ├── config/
 │   ├── db.ts               — Knex connection, created once and reused everywhere
@@ -122,8 +126,6 @@ src/
 │   └── karma.service.ts    — calls the Adjutor API to check the blacklist
 ├── types/
 │   └── index.ts            — TypeScript interfaces shared across the whole app
-├── docs/
-│   └── openapi.json        — OpenAPI 3 spec (Swagger UI loads this file)
 └── utils/
     ├── response.ts         — every API response goes through here
     ├── errors.ts           — creates errors with HTTP status codes attached
@@ -136,8 +138,7 @@ tests/
 │   └── wallet.service.test.ts
 └── integration/
     ├── auth.routes.test.ts
-    ├── wallet.routes.test.ts
-    └── swagger.test.ts
+    └── wallet.routes.test.ts
 ```
 
 ---
@@ -156,7 +157,7 @@ tests/
 | Auth        | Faux Bearer token | The assessment says a full auth system is not needed              |
 | HTTP Client | Axios             | Used to call the Adjutor Karma API                                |
 | Passwords   | bcryptjs          | Passwords are hashed before storage; never returned in API bodies |
-| API docs    | Swagger UI        | Served at `/api-docs` from `src/docs/openapi.json`                |
+| API testing | Postman           | Collection at `docs/postman/Demo-Credit.postman_collection.json` |
 
 
 ---
@@ -172,15 +173,6 @@ Every response from this API looks the same, success or failure:
   "data": {}
 }
 ```
-
----
-
-## API documentation (Swagger)
-
-- **Swagger UI:** `GET /api-docs` (e.g. `http://localhost:3000/api-docs`)
-- **OpenAPI JSON:** `src/docs/openapi.json` (same document the UI loads)
-
-The spec documents **wallet**, **auth/register**, and **auth/login** endpoints. It intentionally does **not** include `GET /health` that route still exists on the server (`{ "status": "ok" }`) for uptime checks, but it is omitted from Swagger to keep the contract focused on wallet flows.
 
 ---
 
@@ -361,7 +353,7 @@ npm run test:coverage
 The tests are split into layers:
 
 - **Unit tests** : services and small helpers (e.g. email validation) with mocks.
-- **Integration tests** : full HTTP stack with Supertest (routes, validation, Swagger smoke test).
+- **Integration tests** : full HTTP stack with Supertest (routes, validation).
 - **E2E tests** (optional) : real MySQL database + real HTTP for balance math on fund / transfer / withdraw (`tests/e2e/`).
 
 ---

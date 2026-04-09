@@ -1,9 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
-import openapiDocument from './docs/openapi.json';
 import { errorHandler } from './middleware/error.middleware';
 import { sendNotFound } from './utils/response';
 
@@ -12,34 +10,12 @@ const app = express();
 app.use(cors());
 app.options('*', cors());
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-      },
-    },
-  })
-);
+app.use(helmet());
 app.use(express.json());
 
 app.get('/', (_req: Request, res: Response) => res.json({ message: 'Welcome to Demo Credit API' }));
 
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
-
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(openapiDocument as Record<string, unknown>, {
-    customSiteTitle: 'Demo Credit API',
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  })
-);
 
 app.use(routes);
 
